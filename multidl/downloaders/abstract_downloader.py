@@ -15,6 +15,9 @@ class AbstractDownloader(ABC):
         self._state = DownloadState.not_started
         self._lock = Lock()
 
+    def get_state(self):
+        return self._state
+
     @abstractmethod
     def start(self):
         with self._lock:

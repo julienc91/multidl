@@ -2,6 +2,7 @@
 
 import os
 import uuid
+import time
 import logging
 from queue import Queue, Empty
 from threading import Thread
@@ -30,11 +31,15 @@ class DownloadManager:
         return SCHEMES[scheme]
 
     def process(self):
+        watcher = Thread(target=self.watcher)
+        watcher.start()
+
         for i in range(self.nb_workers):
             t = Thread(target=self.worker)
             t.start()
 
         self._urls.join()
+        watcher.join()
 
     def worker(self):
         while True:
@@ -60,7 +65,22 @@ class DownloadManager:
         return download_process
 
     def watcher(self):
-        pass
+        while not self._urls.empty() or not self._ongoing_downloads.empty():
+            try:
+                downloader = self._ongoing_downloads.get_nowait()
+            except Empty:
+                pass
+            else:
+                downloader_state = downloader.get_state()
+                if downloader_state == DownloadState.finished:
+                    print('{}: finished'.format(downloader.url))
+                else:
+                    if downloader_state == DownloadState.started:
+                        downloaded, total = downloader.get_progress()
+                        print('{}: {} / {}'.format(downloader.url, downloaded, total))
+                    self._ongoing_downloads.put(downloader)
+            time.sleep(1)
+            print('----------------------')
 
     def pause(self):
         pass

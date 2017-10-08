@@ -26,7 +26,7 @@ def main():
 
     args = parse_args()
 
-    urls = args.config.readlines()
+    urls = [url.strip() for url in args.config.readlines()]
     output = args.output
     nb_workers = args.n
 
