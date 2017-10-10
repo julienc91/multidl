@@ -31,19 +31,26 @@ class HttpDownloader(AbstractDownloader):
                 f.write(chunk)
                 self._downloaded_length += len(chunk)
 
-        with self._lock:
-            if self._state in [DownloadState.started, DownloadState.paused]:
-                self._state = DownloadState.finished
+        if self.state == DownloadState.canceling:
+            self.state = DownloadState.canceled
+        elif self.state != DownloadState.error:
+            self.state = DownloadState.finished
 
     def __get_chunk(self):
-        for chunk in self.__request.iter_content(chunk_size=1024):
-            while self._state == DownloadState.paused:
-                time.sleep(0.1)
-            with self._lock:
-                if self._state == DownloadState.started and chunk:  # ignore keep-alive chunks
+        try:
+            for chunk in self.__request.iter_content(chunk_size=1024):
+                state = self.state
+                while self.state == DownloadState.paused:
+                    time.sleep(0.1)
+                    state = self.state
+
+                if state == DownloadState.started and chunk:  # ignore keep-alive chunks
                     yield chunk
-                elif self._state != DownloadState.started:
+                elif state != DownloadState.started:
                     break
+        except Exception as e:
+            self.state = DownloadState.error
+            self._error = e
 
     def get_progress(self):
         super().get_progress()
