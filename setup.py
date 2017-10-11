@@ -6,7 +6,6 @@ setup(
     packages=['multidl'],
     install_requires=[
         'requests',
-        'argparse',
     ],
     url='https://github.com/julienc91/multidl',
     license='MIT',
