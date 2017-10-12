@@ -14,15 +14,25 @@ from multidl.exceptions import TransitionError
 
 class DownloadManager:
 
-    def __init__(self, urls, output, nb_workers):
-        self.output = output
+    def __init__(self, urls, output_directory, nb_workers, **options):
+
+        self.output_directory = output_directory
         self.nb_workers = min(nb_workers, len(urls))
+        self.options = options
+
         self._urls = Queue()
         self._ongoing_downloads = Queue()
         self._finished_downloads = []
         self._state = DownloadState.not_started
+
+        # initialize the queue
         for url in urls:
             self._urls.put(url)
+
+    def log(self, *args, **kwargs):
+        if self.options.get('quiet'):
+            return
+        print(*args, **kwargs)
 
     @staticmethod
     def get_downloader(url):
@@ -105,19 +115,18 @@ class DownloadManager:
             logging.error('{}: skipping {}'.format(e, url))
             return None
 
-        output = os.path.join(self.output, download_identifier)
+        output = os.path.join(self.output_directory, download_identifier)
         download_process = downloader(url, output)
         return download_process
 
-    @staticmethod
-    def _print_downloader_state(downloader):
+    def _print_downloader_state(self, downloader):
         state = downloader.state
         if state in [DownloadState.finished, DownloadState.canceled, DownloadState.error]:
-            print('{}: {}'.format(downloader.url, STATE_NAMES[state]))
+            self.log('{}: {}'.format(downloader.url, STATE_NAMES[state]))
         else:
             if state == DownloadState.started:
                 downloaded, total = downloader.get_progress()
-                print('{}: {} / {}'.format(downloader.url, downloaded, total))
+                self.log('{}: {} / {}'.format(downloader.url, downloaded, total))
 
     def watcher(self):
         while (self._urls.unfinished_tasks or
@@ -145,7 +154,7 @@ class DownloadManager:
             for downloader in downloaders:
                 self._ongoing_downloads.put(downloader)
 
-            print('----------------------')
+            self.log('----------------------')
             time.sleep(1)
 
     def pause(self):
