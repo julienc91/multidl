@@ -156,6 +156,7 @@ class DownloadManager:
 
             self.log('----------------------')
             time.sleep(1)
+        self.state = DownloadState.finished
 
     def pause(self):
         for downloader in self._downloaders():

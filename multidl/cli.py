@@ -27,7 +27,7 @@ def main():
     args = parse_args()
 
     urls = [url.strip() for url in args.config.readlines()]
-    output_directory = args.output
+    output_directory = args.output_directory
     nb_workers = args.n
 
     download_manager = DownloadManager(urls, output_directory, nb_workers)
