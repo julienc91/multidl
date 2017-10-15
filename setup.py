@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='multidl',
-    version='1.0',
+    version='0.1',
     packages=['multidl'],
     install_requires=[
         'requests',
