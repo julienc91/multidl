@@ -22,6 +22,10 @@ class FtpDownloader(AbstractDownloader):
         self.__ftp.connect(host=hostname, port=port)
         self.__ftp.login(username, password)
 
+    def get_file_name(self):
+        parsed_url = urlparse(self.url)
+        return os.path.basename(parsed_url.path)
+
     def start(self):
         super().start()
 

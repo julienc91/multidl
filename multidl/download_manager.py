@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import uuid
 import time
 import logging
 from queue import Queue, Empty
@@ -103,19 +102,19 @@ class DownloadManager:
             except Empty:
                 break
 
-            downloader = self.process_single_url(url, str(uuid.uuid4()))
+            downloader = self.process_single_url(url)
             self._ongoing_downloads.put(downloader)
             downloader.start()
             self._urls.task_done()
 
-    def process_single_url(self, url, download_identifier):
+    def process_single_url(self, url):
         try:
             downloader = self.get_downloader(url)
         except NotImplementedError as e:
             logging.error('{}: skipping {}'.format(e, url))
             return None
 
-        output = os.path.join(self.output_directory, download_identifier)
+        output = os.path.join(self.output_directory)
         download_process = downloader(url, output)
         return download_process
 

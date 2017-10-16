@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 import time
 from abc import ABC, abstractmethod
 from threading import Lock
@@ -10,13 +11,40 @@ from multidl.exceptions import TransitionError
 
 class AbstractDownloader(ABC):
 
-    def __init__(self, url, output, **options):
+    def __init__(self, url, output_directory, **options):
         self.url = url
         self.options = options
-        self.output = output
+        self._output_file = None
+        self._output_directory = output_directory
         self._state = DownloadState.not_started
         self._error = None
         self._lock = Lock()
+
+    @property
+    def output(self):
+        if self._output_file:
+            return self._output_file
+
+        base_file_name = self.get_file_name()
+        if not base_file_name:
+            raise RuntimeError('Cannot set output file for download')
+
+        index = 0
+        while index < 1000:
+            if index == 0:
+                filename = base_file_name
+            else:
+                filename, extension = os.path.splitext(base_file_name)
+                filename = filename + "_" + str(index) + extension
+            filepath = os.path.join(self._output_directory, filename)
+            try:
+                with open(filepath, 'x'):
+                    self._output_file = filepath
+            except FileExistsError:
+                index += 1
+            else:
+                return self.output
+        raise RuntimeError('Cannot set output file for download')
 
     @property
     def state(self):
@@ -30,7 +58,15 @@ class AbstractDownloader(ABC):
             self._state = value
 
     @abstractmethod
+    def get_file_name(self):
+        return ''
+
+    @abstractmethod
     def start(self):
+        try:
+            os.makedirs(os.path.dirname(self.output))
+        except OSError:
+            pass
         self.state = DownloadState.started
 
     def cancel(self):

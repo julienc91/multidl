@@ -2,6 +2,7 @@
 
 import os
 import time
+from urllib.parse import urlparse
 
 import requests
 
@@ -16,6 +17,10 @@ class HttpDownloader(AbstractDownloader):
         self._download_length = 0
         self._downloaded_length = 0
         self.__request = None
+
+    def get_file_name(self):
+        parsed_url = urlparse(self.url)
+        return os.path.basename(parsed_url.path) or 'index.html'
 
     def start(self):
         super().start()

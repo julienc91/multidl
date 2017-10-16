@@ -17,6 +17,10 @@ class LocalFileDownloader(AbstractDownloader):
         self._download_length = 0
         self._downloaded_length = 0
 
+    def get_file_name(self):
+        parsed_url = urlparse(self.url)
+        return os.path.basename(parsed_url.path)
+
     def start(self):
         super().start()
 
