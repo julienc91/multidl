@@ -2,6 +2,7 @@
 
 import os
 import uuid
+import shutil
 import hashlib
 import tempfile
 
@@ -49,8 +50,25 @@ def local_file_url():
 
 
 @pytest.fixture(scope='session')
+def test_urls(http_url, ftp_url, local_file_url):
+    return [
+        http_url,
+        ftp_url,
+        local_file_url,
+    ]
+
+
+@pytest.fixture(scope='function')
 def tempdir():
-    return tempfile.gettempdir()
+    base_tempdir = tempfile.gettempdir()
+    random = str(uuid.uuid4())
+    resulting_tempdir = os.path.join(base_tempdir, random)
+
+    os.makedirs(resulting_tempdir)
+
+    yield resulting_tempdir
+
+    shutil.rmtree(resulting_tempdir, ignore_errors=True)
 
 
 @pytest.fixture(
@@ -62,3 +80,18 @@ def tempdir():
 )
 def downloader(request):
     return request.getfixturevalue(request.param[0]), request.param[1]
+
+
+@pytest.fixture(scope='session')
+def config_file(test_urls):
+
+    config_file_name = str(uuid.uuid4())
+
+    with open(config_file_name, 'w') as f:
+        for url in test_urls:
+            url, _, _, _ = url
+            f.write(url + '\n')
+
+    yield os.path.abspath(config_file_name)
+
+    os.remove(config_file_name)
