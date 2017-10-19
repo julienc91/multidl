@@ -69,7 +69,8 @@ class FtpDownloader(AbstractDownloader):
 
     def cancel(self):
         super().cancel()
-        self.__ftp.abort()
+        if self.__ftp.sock:
+            self.__ftp.abort()
         try:
             os.remove(self.output)
         except OSError:

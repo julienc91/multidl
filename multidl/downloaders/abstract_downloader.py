@@ -55,6 +55,11 @@ class AbstractDownloader(ABC):
         with self._lock:
             if value not in STATE_TRANSITIONS[self._state]:
                 raise TransitionError(self._state, value)
+
+            # if the download has not started yet, cancellation is immediate
+            if value == DownloadState.canceling:
+                if self._state == DownloadState.not_started:
+                    value = DownloadState.canceled
             self._state = value
 
     @abstractmethod
@@ -63,6 +68,9 @@ class AbstractDownloader(ABC):
 
     @abstractmethod
     def start(self):
+        if self.state != DownloadState.not_started:
+            return
+
         try:
             os.makedirs(os.path.dirname(self.output))
         except OSError:

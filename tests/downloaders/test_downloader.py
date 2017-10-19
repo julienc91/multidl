@@ -41,3 +41,17 @@ def test_basic_download(downloader, tempdir):
 
     resulting_hash = hasher(content).hexdigest()
     assert resulting_hash == expected_hash
+
+
+def test_cancel_download_before_start(downloader, tempdir):
+
+    url, downloader = downloader
+    url, hasher, expected_hash, expected_size = url
+
+    downloader = downloader(url, tempdir)
+    downloader.cancel()
+
+    assert downloader.state == DownloadState.canceled
+
+    downloaded_size, _ = downloader.get_progress()
+    assert downloaded_size == 0
