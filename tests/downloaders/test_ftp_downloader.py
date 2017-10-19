@@ -18,12 +18,16 @@ def test_get_file_name(url, expected):
 
 
 def test_download(ftp_url, tempdir):
-    url, hasher, expected_hash = ftp_url
+    url, hasher, expected_hash, expected_size = ftp_url
     downloader = FtpDownloader(url, tempdir)
     assert downloader.state == DownloadState.not_started
 
     downloader.start()
     assert downloader.state == DownloadState.finished
+    downloaded_size, download_size = downloader.get_progress()
+
+    assert downloaded_size == download_size
+    assert downloaded_size == expected_size
 
     with open(downloader.output, 'rb') as f:
         content = f.read()

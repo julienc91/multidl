@@ -11,9 +11,10 @@ import pytest
 @pytest.fixture(scope='session')
 def http_url():
     return (
-        'http://ovh.net/files/1Mb.dat',
+        'http://ovh.net/files/1Mio.dat',
         hashlib.sha1,
-        'a1684971de0de7327037f09fe0e1da3eeeae4115',
+        '22c952ea2b497171d37b76f0830ef8d9911cfe9b',
+        1048576,
     )
 
 
@@ -23,6 +24,7 @@ def ftp_url():
         'ftp://speedtest.tele2.net/1MB.zip',
         hashlib.sha1,
         '3b71f43ff30f4b15b5cd85dd9e95ebc7e84eb5a3',
+        1048576,
     )
 
 
@@ -38,6 +40,7 @@ def local_file_url():
         os.path.abspath(filename),
         hashlib.sha1,
         content_hash,
+        len(content),
     )
 
     os.remove(filename)
