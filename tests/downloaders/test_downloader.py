@@ -2,21 +2,7 @@
 
 import os
 
-import pytest
-
-import multidl.downloaders
 from multidl.constants import DownloadState
-
-
-@pytest.fixture(
-    params=[
-        ('http_url', multidl.downloaders.HttpDownloader),
-        ('ftp_url', multidl.downloaders.FtpDownloader),
-        ('local_file_url', multidl.downloaders.LocalFileDownloader),
-    ]
-)
-def downloader(request):
-    return request.getfixturevalue(request.param[0]), request.param[1]
 
 
 def test_basic_download(downloader, tempdir):

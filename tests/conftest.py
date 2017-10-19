@@ -7,6 +7,8 @@ import tempfile
 
 import pytest
 
+import multidl.downloaders
+
 
 @pytest.fixture(scope='session')
 def http_url():
@@ -37,7 +39,7 @@ def local_file_url():
         f.write(content)
 
     yield (
-        os.path.abspath(filename),
+        'file://' + os.path.abspath(filename),
         hashlib.sha1,
         content_hash,
         len(content),
@@ -49,3 +51,14 @@ def local_file_url():
 @pytest.fixture(scope='session')
 def tempdir():
     return tempfile.gettempdir()
+
+
+@pytest.fixture(
+    params=[
+        ('http_url', multidl.downloaders.HttpDownloader),
+        ('ftp_url', multidl.downloaders.FtpDownloader),
+        ('local_file_url', multidl.downloaders.LocalFileDownloader),
+    ]
+)
+def downloader(request):
+    return request.getfixturevalue(request.param[0]), request.param[1]
