@@ -15,6 +15,11 @@ def test_get_downloader(downloader):
     assert res == downloader
 
 
+def test_get_downloader_invalid_url():
+    with pytest.raises(NotImplementedError):
+        DownloadManager.get_downloader('foo://bar')
+
+
 @pytest.mark.parametrize('current_state, new_state', [
     (DownloadState.not_started, DownloadState.started),
     (DownloadState.not_started, DownloadState.canceling),
