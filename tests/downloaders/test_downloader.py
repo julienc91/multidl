@@ -2,7 +2,10 @@
 
 import os
 
+import pytest
+
 from multidl.constants import DownloadState
+from multidl.exceptions import TransitionError
 
 
 def test_basic_download(downloader, tempdir):
@@ -29,7 +32,7 @@ def test_basic_download(downloader, tempdir):
     assert resulting_hash == expected_hash
 
 
-def test_cancel_download_before_start(downloader, tempdir):
+def test_cancel_before_start(downloader, tempdir):
 
     url, downloader = downloader
     url, hasher, expected_hash, expected_size = url
@@ -41,3 +44,49 @@ def test_cancel_download_before_start(downloader, tempdir):
 
     downloaded_size, _ = downloader.get_progress()
     assert downloaded_size == 0
+
+
+def test_pause_before_start(downloader, tempdir):
+
+    url, downloader = downloader
+    url, hasher, expected_hash, expected_size = url
+
+    downloader = downloader(url, tempdir)
+    with pytest.raises(TransitionError):
+        downloader.pause()
+
+    assert downloader.state == DownloadState.not_started
+
+
+def test_resume_before_start(downloader, tempdir):
+
+    url, downloader = downloader
+    url, hasher, expected_hash, expected_size = url
+
+    downloader = downloader(url, tempdir)
+    with pytest.raises(TransitionError):
+        downloader.resume()
+
+    assert downloader.state == DownloadState.not_started
+
+
+def test_pause_after_start(downloader, tempdir):
+    url, downloader = downloader
+    url, hasher, expected_hash, expected_size = url
+
+    downloader = downloader(url, tempdir)
+    downloader._state = DownloadState.started
+
+    downloader.pause()
+    assert downloader.state == DownloadState.paused
+
+
+def test_resume_after_pause(downloader, tempdir):
+    url, downloader = downloader
+    url, hasher, expected_hash, expected_size = url
+
+    downloader = downloader(url, tempdir)
+    downloader._state = DownloadState.paused
+
+    downloader.resume()
+    assert downloader.state == DownloadState.started

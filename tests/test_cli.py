@@ -2,7 +2,7 @@
 
 import pytest
 
-from multidl.cli import parse_args
+from multidl.cli import parse_args, main
 
 
 def test_parse_args(monkeypatch, config_file, tempdir):
@@ -41,3 +41,8 @@ def test_parse_args_invalid_parameters(monkeypatch, config_file, tempdir):
         monkeypatch.setattr('sys.argv', arg)
         with pytest.raises(SystemExit):
             parse_args()
+
+
+def test_run_from_cli(monkeypatch, config_file, tempdir):
+    monkeypatch.setattr('sys.argv', ['multidl', '-n', '4', '-c', config_file, '-o', tempdir])
+    main()

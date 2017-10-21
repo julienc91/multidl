@@ -83,9 +83,11 @@ class AbstractDownloader(ABC):
             time.sleep(0.1)
 
     def pause(self):
+        self.state = DownloadState.pausing
         self.state = DownloadState.paused
 
     def resume(self):
+        self.state = DownloadState.resuming
         self.state = DownloadState.started
 
     @abstractmethod

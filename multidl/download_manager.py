@@ -158,13 +158,19 @@ class DownloadManager:
         self.state = DownloadState.finished
 
     def pause(self):
+        self.state = DownloadState.pausing
         for downloader in self._downloaders():
             downloader.pause()
+        self.state = DownloadState.paused
 
     def resume(self):
+        self.state = DownloadState.resuming
         for downloader in self._downloaders():
             downloader.resume()
+        self.state = DownloadState.started
 
     def cancel(self):
+        self.state = DownloadState.canceling
         for downloader in self._downloaders():
             downloader.cancel()
+        self.state = DownloadState.canceled

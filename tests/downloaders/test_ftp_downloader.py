@@ -10,6 +10,6 @@ from multidl.downloaders.ftp_downloader import FtpDownloader
     ('ftp://user:password@example.com/dir/file2.txt', 'file2.txt'),
     ('ftp://user:password@example.com:2222/dir/file3.txt', 'file3.txt'),
 ])
-def test_get_file_name(url, expected):
-    downloader = FtpDownloader(url, '/tmp')
+def test_get_file_name(tempdir, url, expected):
+    downloader = FtpDownloader(url, tempdir)
     assert downloader.get_file_name() == expected

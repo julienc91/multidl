@@ -23,9 +23,12 @@ def test_get_downloader_invalid_url():
 @pytest.mark.parametrize('current_state, new_state', [
     (DownloadState.not_started, DownloadState.started),
     (DownloadState.not_started, DownloadState.canceling),
-    (DownloadState.started, DownloadState.paused),
-    (DownloadState.paused, DownloadState.started),
+    (DownloadState.started, DownloadState.pausing),
+    (DownloadState.pausing, DownloadState.paused),
+    (DownloadState.paused, DownloadState.resuming),
+    (DownloadState.resuming, DownloadState.started),
     (DownloadState.started, DownloadState.canceling),
+    (DownloadState.canceling, DownloadState.canceled),
     (DownloadState.started, DownloadState.finished),
 ])
 def test_change_state(tempdir, current_state, new_state):
@@ -40,7 +43,9 @@ def test_change_state(tempdir, current_state, new_state):
 
 @pytest.mark.parametrize('current_state, new_state', [
     (DownloadState.started, DownloadState.not_started),
+    (DownloadState.not_started, DownloadState.paused),
     (DownloadState.started, DownloadState.started),
+    (DownloadState.started, DownloadState.resuming),
     (DownloadState.finished, DownloadState.paused),
     (DownloadState.canceling, DownloadState.started),
 ])

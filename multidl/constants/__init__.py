@@ -6,21 +6,26 @@ from enum import Enum
 class DownloadState(Enum):
     not_started = 1
     started = 2
-    paused = 3
-    canceled = 4
-    canceling = 5
-    error = 6
-    finished = 7
+    pausing = 3
+    paused = 4
+    resuming = 5
+    canceling = 6
+    canceled = 7
+    error = 8
+    finished = 9
 
 
 STATE_TRANSITIONS = {
-    DownloadState.not_started: [DownloadState.started, DownloadState.paused,
-                                DownloadState.canceling, DownloadState.error,
-                                DownloadState.finished],
-    DownloadState.started: [DownloadState.paused, DownloadState.canceling,
+    DownloadState.not_started: [DownloadState.started, DownloadState.canceling,
+                                DownloadState.error, DownloadState.finished],
+    DownloadState.started: [DownloadState.pausing, DownloadState.canceling,
                             DownloadState.error, DownloadState.finished],
-    DownloadState.paused: [DownloadState.started, DownloadState.canceling,
+    DownloadState.pausing: [DownloadState.paused, DownloadState.error,
+                            DownloadState.finished],
+    DownloadState.paused: [DownloadState.resuming, DownloadState.canceling,
                            DownloadState.error, DownloadState.finished],
+    DownloadState.resuming: [DownloadState.started, DownloadState.error,
+                             DownloadState.finished],
     DownloadState.canceling: [DownloadState.error, DownloadState.canceled,
                               DownloadState.finished],
     DownloadState.canceled: [DownloadState.error],
