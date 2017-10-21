@@ -78,3 +78,12 @@ def test_cancel_before_start(test_urls, tempdir):
     download_manager = DownloadManager(urls, tempdir, 4)
     download_manager.cancel()
     assert download_manager.state == DownloadState.canceled
+
+
+def test_basic_download_invalid_url(tempdir):
+
+    urls = ['foo://bar']
+    download_manager = DownloadManager(urls, tempdir, 4)
+    download_manager.process()
+
+    assert download_manager.state == DownloadState.finished

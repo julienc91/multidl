@@ -2,7 +2,6 @@
 
 import os
 import time
-import logging
 from queue import Queue, Empty
 from threading import Thread
 
@@ -103,15 +102,16 @@ class DownloadManager:
                 break
 
             downloader = self.process_single_url(url)
-            self._ongoing_downloads.put(downloader)
-            downloader.start()
+            if downloader:
+                self._ongoing_downloads.put(downloader)
+                downloader.start()
             self._urls.task_done()
 
     def process_single_url(self, url):
         try:
             downloader = self.get_downloader(url)
         except NotImplementedError as e:
-            logging.error('{}: skipping {}'.format(e, url))
+            self.log('{}: skipping {}'.format(e, url))
             return None
 
         output = os.path.join(self.output_directory)
