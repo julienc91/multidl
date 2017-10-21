@@ -8,6 +8,22 @@ from multidl.constants import DownloadState
 from multidl.exceptions import TransitionError
 
 
+def test_download_multiple_files_same_name(downloader, tempdir):
+
+    url, downloader = downloader
+    url, _, _, _ = url
+
+    downloaders = [
+        downloader(url, tempdir)
+        for _ in range(50)
+    ]
+
+    output_files = {
+        downloader.output for downloader in downloaders
+    }
+    assert len(output_files) == len(downloaders)
+
+
 def test_basic_download(downloader, tempdir):
 
     url, downloader = downloader

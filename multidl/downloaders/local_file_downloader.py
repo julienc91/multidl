@@ -2,6 +2,7 @@
 
 import os
 import time
+from contextlib import suppress
 from urllib.parse import urlparse
 
 from multidl.downloaders.abstract_downloader import AbstractDownloader
@@ -48,12 +49,9 @@ class LocalFileDownloader(AbstractDownloader):
         return f.read(self.CHUNK_SIZE)
 
     def get_progress(self):
-        super().get_progress()
         return self._downloaded_length, self._download_length
 
     def cancel(self):
         super().cancel()
-        try:
+        with suppress(OSError):
             os.remove(self.output)
-        except OSError:
-            pass

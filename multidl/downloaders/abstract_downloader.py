@@ -3,6 +3,7 @@
 import os
 import time
 from abc import ABC, abstractmethod
+from contextlib import suppress
 from threading import Lock
 
 from multidl.constants import DownloadState, STATE_TRANSITIONS
@@ -71,10 +72,8 @@ class AbstractDownloader(ABC):
         if self.state != DownloadState.not_started:
             return
 
-        try:
+        with suppress(OSError):
             os.makedirs(os.path.dirname(self.output))
-        except OSError:
-            pass
         self.state = DownloadState.started
 
     def cancel(self):

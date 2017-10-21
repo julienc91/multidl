@@ -2,6 +2,7 @@
 
 import os
 import time
+from contextlib import suppress
 from urllib.parse import urlparse
 
 import requests
@@ -26,10 +27,8 @@ class HttpDownloader(AbstractDownloader):
         super().start()
 
         self.__request = requests.get(self.url, stream=True)
-        try:
+        with suppress(KeyError, ValueError):
             self._download_length = int(self.__request.headers['content-length'])
-        except (KeyError, ValueError):
-            pass
 
         with open(self.output, "wb") as f:
             for chunk in self.__get_chunk():
@@ -58,12 +57,9 @@ class HttpDownloader(AbstractDownloader):
             self._error = e
 
     def get_progress(self):
-        super().get_progress()
         return self._downloaded_length, self._download_length
 
     def cancel(self):
         super().cancel()
-        try:
+        with suppress(OSError):
             os.remove(self.output)
-        except OSError:
-            pass

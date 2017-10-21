@@ -65,6 +65,16 @@ def test_basic_downloads(test_urls, tempdir):
     urls = [url[0] for url in test_urls]
 
     download_manager = DownloadManager(urls, tempdir, 4)
+    assert download_manager.state == DownloadState.not_started
     download_manager.process()
 
     assert download_manager.state == DownloadState.finished
+
+
+def test_cancel_before_start(test_urls, tempdir):
+
+    urls = [url[0] for url in test_urls]
+
+    download_manager = DownloadManager(urls, tempdir, 4)
+    download_manager.cancel()
+    assert download_manager.state == DownloadState.canceled

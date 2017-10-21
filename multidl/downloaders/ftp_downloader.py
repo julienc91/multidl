@@ -3,6 +3,7 @@
 import os
 import time
 from ftplib import FTP
+from contextlib import suppress
 from urllib.parse import urlparse
 
 from multidl.downloaders.abstract_downloader import AbstractDownloader
@@ -44,12 +45,9 @@ class FtpDownloader(AbstractDownloader):
         self._download_length = self.__ftp.size(path)
         remote_filename = os.path.basename(path)
 
-        try:
-            with open(self.output, 'wb') as f:
-                self.__ftp.retrbinary("RETR " + remote_filename,
-                                      lambda data: self.__write_chunk(f, data))
-        except KeyError:
-            pass
+        with open(self.output, 'wb') as f:
+            self.__ftp.retrbinary("RETR " + remote_filename,
+                                  lambda data: self.__write_chunk(f, data))
 
         if self.state == DownloadState.canceling:
             self.state = DownloadState.canceled
@@ -64,14 +62,11 @@ class FtpDownloader(AbstractDownloader):
         f.write(data)
 
     def get_progress(self):
-        super().get_progress()
         return self._downloaded_length, self._download_length
 
     def cancel(self):
         super().cancel()
         if self.__ftp.sock:
             self.__ftp.abort()
-        try:
+        with suppress(OSError):
             os.remove(self.output)
-        except OSError:
-            pass
