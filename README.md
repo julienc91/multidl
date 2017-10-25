@@ -44,3 +44,7 @@ ftp://me:passw0rd@ftpserver.com/dir/file2.txt
 Then launch `multidl`:
 
     multidl -c urls.txt -o /tmp -n 3
+    
+You can also give the targeted urls to `multidl` via `stdin` like so:
+
+    cat urls.txt | multidl -o /tmp -n 3

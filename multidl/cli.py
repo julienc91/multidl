@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import argparse
 
 from multidl.download_manager import DownloadManager
@@ -27,15 +28,16 @@ def parse_args():
         return value
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--config', required=True,
-                        type=argparse.FileType('r'),
+    parser.add_argument('-c', '--config', type=argparse.FileType('r'),
+                        default=sys.stdin,
                         help='A file listing the targetted urls, '
-                             'one item per line.')
+                             'one item per line. Leave empty to read '
+                             'from stdin.')
     parser.add_argument('-o', '--output-directory', required=True,
                         type=readable_directory,
                         help='Output directory.')
-    parser.add_argument('-n', default=10, type=positive_integer,
-                        help='Number of parallel downloads')
+    parser.add_argument('-n', default=4, type=positive_integer,
+                        help='Number of parallel downloads. Default is 4.')
     args = parser.parse_args()
     return args
 
