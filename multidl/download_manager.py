@@ -19,13 +19,13 @@ class DownloadManager:
         self.options = options
 
         self._urls = Queue()
-        self._ongoing_downloads = Queue()
-        self._finished_downloads = []
         self._state = DownloadState.not_started
+        self._downloaders = []
 
         # initialize the queue
-        for url in urls:
-            self._urls.put(url)
+        for i, url in enumerate(urls):
+            self._urls.put((i, url))
+            self._downloaders.append((None, url))
 
     def log(self, *args, **kwargs):
         if self.options.get('quiet'):
@@ -50,25 +50,6 @@ class DownloadManager:
         if value not in STATE_TRANSITIONS[current_state]:
             raise TransitionError(current_state, value)
         self._state = value
-
-    def _downloaders(self):
-        """
-        Helper function to iterate over self._ongoing_downloads once, and then
-        put back every element into the queue.
-        :return: iterator of downloaders
-        """
-        downloaders = []
-        while True:
-            try:
-                downloader = self._ongoing_downloads.get_nowait()
-            except Empty:
-                break
-
-            yield downloader
-            downloaders.append(downloader)
-
-        for downloader in downloaders:
-            self._ongoing_downloads.put(downloader)
 
     def process(self):
         self.state = DownloadState.started
@@ -97,13 +78,13 @@ class DownloadManager:
                 continue
 
             try:
-                url = self._urls.get_nowait()
+                index, url = self._urls.get_nowait()
             except Empty:
                 break
 
             downloader = self.process_single_url(url)
             if downloader:
-                self._ongoing_downloads.put(downloader)
+                self._downloaders[index] = (downloader, url)
                 downloader.start()
             self._urls.task_done()
 
@@ -118,59 +99,44 @@ class DownloadManager:
         download_process = downloader(url, output)
         return download_process
 
-    def _print_downloader_state(self, downloader):
-        state = downloader.state
-        if state in [DownloadState.finished, DownloadState.canceled, DownloadState.error]:
-            self.log('{}: {}'.format(downloader.url, STATE_NAMES[state]))
+    def _print_downloader_state(self, downloader, url):
+
+        if downloader is None:
+            state = DownloadState.not_started
         else:
-            if state == DownloadState.started:
-                downloaded, total = downloader.get_progress()
-                self.log('{}: {} / {}'.format(downloader.url, downloaded, total))
+            state = downloader.state
+
+        if state in [DownloadState.not_started, DownloadState.finished,
+                     DownloadState.canceled, DownloadState.error]:
+            self.log('{}: {}'.format(url, STATE_NAMES[state]))
+        else:
+            downloaded, total = downloader.get_progress()
+            self.log('{}: {} - {} / {}'.format(url, STATE_NAMES[state], downloaded, total))
 
     def watcher(self):
-        while (self._urls.unfinished_tasks or
-               not self._ongoing_downloads.empty()):
+        while self._urls.unfinished_tasks:
 
-            for downloader in self._finished_downloads:
-                self._print_downloader_state(downloader)
-
-            downloaders = []
-            while True:
-                try:
-                    downloader = self._ongoing_downloads.get_nowait()
-                except Empty:
-                    break
-                else:
-                    downloader_state = downloader.state
-                    self._print_downloader_state(downloader)
-                    if downloader_state in [DownloadState.finished,
-                                            DownloadState.canceled,
-                                            DownloadState.error]:
-                        self._finished_downloads.append(downloader)
-                    else:
-                        downloaders.append(downloader)
-
-            for downloader in downloaders:
-                self._ongoing_downloads.put(downloader)
-
+            for downloader, url in self._downloaders:
+                self._print_downloader_state(downloader, url)
             self.log('----------------------')
             time.sleep(1)
+
         self.state = DownloadState.finished
 
     def pause(self):
         self.state = DownloadState.pausing
-        for downloader in self._downloaders():
-            downloader.pause()
+        for downloader, _ in self._downloaders:
+            downloader and downloader.pause()
         self.state = DownloadState.paused
 
     def resume(self):
         self.state = DownloadState.resuming
-        for downloader in self._downloaders():
-            downloader.resume()
+        for downloader, _ in self._downloaders:
+            downloader and downloader.resume()
         self.state = DownloadState.started
 
     def cancel(self):
         self.state = DownloadState.canceling
-        for downloader in self._downloaders():
-            downloader.cancel()
+        for downloader, _ in self._downloaders:
+            downloader and downloader.cancel()
         self.state = DownloadState.canceled
