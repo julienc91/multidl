@@ -31,17 +31,16 @@ class AbstractDownloader(ABC):
             raise RuntimeError('Cannot set output file for download')
 
         index = 0
+        filename = base_file_name
         while index < 1000:
-            if index == 0:
-                filename = base_file_name
-            else:
-                filename, extension = os.path.splitext(base_file_name)
-                filename = filename + "_" + str(index) + extension
             filepath = os.path.join(self._output_directory, filename)
-            if not self.__try_create_output_file(filepath):
-                index += 1
-            else:
+            if self.__try_create_output_file(filepath):
                 return self.output
+
+            index += 1
+            filename, extension = os.path.splitext(base_file_name)
+            filename = filename + "_" + str(index) + extension
+
         raise RuntimeError('Cannot set output file for download')
 
     def __try_create_output_file(self, filepath):
@@ -85,6 +84,12 @@ class AbstractDownloader(ABC):
         with suppress(OSError):
             os.makedirs(os.path.dirname(self.output))
         self.state = DownloadState.started
+
+    def _finish(self):
+        if self.state == DownloadState.canceling:
+            self.state = DownloadState.canceled
+        elif self.state != DownloadState.error:
+            self.state = DownloadState.finished
 
     def cancel(self):
         self.state = DownloadState.canceling

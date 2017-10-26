@@ -16,7 +16,13 @@ class FtpDownloader(AbstractDownloader):
         self._downloaded_length = 0
         self.__ftp = FTP()
 
-    def __connect(self, hostname, port, username, password):
+    def __connect(self):
+
+        parsed_url = urlparse(self.url)
+        hostname = parsed_url.hostname
+        port = parsed_url.port or 0
+        username = parsed_url.username
+        password = parsed_url.password
 
         self.__ftp.connect(host=hostname, port=port)
         self.__ftp.login(username, password)
@@ -29,14 +35,10 @@ class FtpDownloader(AbstractDownloader):
         super().start()
 
         parsed_url = urlparse(self.url)
-        hostname = parsed_url.hostname
-        port = parsed_url.port or 0
-        username = parsed_url.username
-        password = parsed_url.password
         path = parsed_url.path
         dirname = os.path.dirname(path)
 
-        self.__connect(hostname, port, username, password)
+        self.__connect()
         if dirname:
             self.__ftp.cwd(dirname)
 
@@ -46,11 +48,7 @@ class FtpDownloader(AbstractDownloader):
         with open(self.output, 'wb') as f:
             self.__ftp.retrbinary("RETR " + remote_filename,
                                   lambda data: self.__write_chunk(f, data))
-
-        if self.state == DownloadState.canceling:
-            self.state = DownloadState.canceled
-        elif self.state != DownloadState.error:
-            self.state = DownloadState.finished
+        self._finish()
 
     def __write_chunk(self, f, data):
         self._wait_in_state(DownloadState.paused)

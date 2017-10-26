@@ -35,11 +35,7 @@ class LocalFileDownloader(AbstractDownloader):
                     break
                 self._downloaded_length += len(data)
                 fw.write(data)
-
-        if self.state == DownloadState.canceling:
-            self.state = DownloadState.canceled
-        elif self.state != DownloadState.error:
-            self.state = DownloadState.finished
+        self._finish()
 
     def __get_chunk(self, f):
         self._wait_in_state(DownloadState.paused)

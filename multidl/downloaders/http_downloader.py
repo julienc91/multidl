@@ -33,11 +33,7 @@ class HttpDownloader(AbstractDownloader):
             for chunk in self.__get_chunk():
                 f.write(chunk)
                 self._downloaded_length += len(chunk)
-
-        if self.state == DownloadState.canceling:
-            self.state = DownloadState.canceled
-        elif self.state != DownloadState.error:
-            self.state = DownloadState.finished
+        self._finish()
 
     def __get_chunk(self):
         for chunk in self.__request.iter_content(chunk_size=1024):
