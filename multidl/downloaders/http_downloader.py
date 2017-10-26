@@ -27,7 +27,8 @@ class HttpDownloader(AbstractDownloader):
 
         self.__request = requests.get(self.url, stream=True)
         with suppress(KeyError, ValueError):
-            self._download_length = int(self.__request.headers['content-length'])
+            self._download_length = int(self.__request
+                                        .headers['content-length'])
 
         with open(self.output, "wb") as f:
             for chunk in self.__get_chunk():
@@ -40,7 +41,8 @@ class HttpDownloader(AbstractDownloader):
             self._wait_in_state(DownloadState.paused)
             state = self.state
 
-            if state == DownloadState.started and chunk:  # ignore keep-alive chunks
+            if state == DownloadState.started and chunk:
+                # ignore keep-alive chunks
                 yield chunk
             elif state != DownloadState.started:
                 break

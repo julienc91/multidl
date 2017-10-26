@@ -111,7 +111,8 @@ class DownloadManager:
             self.log('{}: {}'.format(url, STATE_NAMES[state]))
         else:
             downloaded, total = downloader.get_progress()
-            self.log('{}: {} - {} / {}'.format(url, STATE_NAMES[state], downloaded, total))
+            self.log('{}: {} - {} / {}'.format(url, STATE_NAMES[state],
+                                               downloaded, total))
 
     def watcher(self):
         while self._urls.unfinished_tasks:

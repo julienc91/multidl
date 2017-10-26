@@ -13,7 +13,8 @@ def positive_integer(value):
         if value <= 0:
             raise ValueError
     except (TypeError, ValueError):
-        raise argparse.ArgumentTypeError("{} is not a positive integer".format(value))
+        raise argparse.ArgumentTypeError("{} is not a positive integer"
+                                         .format(value))
     return value
 
 
@@ -23,7 +24,8 @@ def readable_directory(value):
                 not os.access(value, os.R_OK)):
             raise ValueError
     except (ValueError, OSError):
-        raise argparse.ArgumentTypeError("{} is not a valid directory".format(value))
+        raise argparse.ArgumentTypeError("{} is not a valid directory"
+                                         .format(value))
     return value
 
 
