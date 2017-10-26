@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import time
 from contextlib import suppress
 from urllib.parse import urlparse
 
@@ -42,10 +41,8 @@ class HttpDownloader(AbstractDownloader):
 
     def __get_chunk(self):
         for chunk in self.__request.iter_content(chunk_size=1024):
+            self._wait_in_state(DownloadState.paused)
             state = self.state
-            while self.state == DownloadState.paused:
-                time.sleep(0.1)
-                state = self.state
 
             if state == DownloadState.started and chunk:  # ignore keep-alive chunks
                 yield chunk
@@ -57,5 +54,4 @@ class HttpDownloader(AbstractDownloader):
 
     def cancel(self):
         super().cancel()
-        with suppress(OSError):
-            os.remove(self.output)
+        self.delete_output()

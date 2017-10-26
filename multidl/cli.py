@@ -7,25 +7,27 @@ import argparse
 from multidl.download_manager import DownloadManager
 
 
+def positive_integer(value):
+    try:
+        value = int(value)
+        if value <= 0:
+            raise ValueError
+    except (TypeError, ValueError):
+        raise argparse.ArgumentTypeError("{} is not a positive integer".format(value))
+    return value
+
+
+def readable_directory(value):
+    try:
+        if (not os.path.isdir(value) or
+                not os.access(value, os.R_OK)):
+            raise ValueError
+    except (ValueError, OSError):
+        raise argparse.ArgumentTypeError("{} is not a valid directory".format(value))
+    return value
+
+
 def parse_args():
-
-    def positive_integer(value):
-        try:
-            value = int(value)
-            if value <= 0:
-                raise ValueError
-        except (TypeError, ValueError):
-            raise argparse.ArgumentTypeError("{} is not a positive integer".format(value))
-        return value
-
-    def readable_directory(value):
-        try:
-            if (not os.path.isdir(value) or
-                    not os.access(value, os.R_OK)):
-                raise ValueError
-        except (ValueError, OSError):
-            raise argparse.ArgumentTypeError("{} is not a valid directory".format(value))
-        return value
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=argparse.FileType('r'),

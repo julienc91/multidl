@@ -38,14 +38,20 @@ class AbstractDownloader(ABC):
                 filename, extension = os.path.splitext(base_file_name)
                 filename = filename + "_" + str(index) + extension
             filepath = os.path.join(self._output_directory, filename)
-            try:
-                with open(filepath, 'x'):
-                    self._output_file = filepath
-            except FileExistsError:
+            if not self.__try_create_output_file(filepath):
                 index += 1
             else:
                 return self.output
         raise RuntimeError('Cannot set output file for download')
+
+    def __try_create_output_file(self, filepath):
+        try:
+            with open(filepath, 'x'):
+                self._output_file = filepath
+        except FileExistsError:
+            return None
+        else:
+            return self.output
 
     @property
     def state(self):
@@ -63,6 +69,10 @@ class AbstractDownloader(ABC):
                     value = DownloadState.canceled
             self._state = value
 
+    def _wait_in_state(self, state):
+        while self.state == state:
+            time.sleep(0.1)
+
     @abstractmethod
     def get_file_name(self):
         return ''
@@ -78,8 +88,11 @@ class AbstractDownloader(ABC):
 
     def cancel(self):
         self.state = DownloadState.canceling
-        while self.state == DownloadState.canceling:
-            time.sleep(0.1)
+        self._wait_in_state(DownloadState.canceling)
+
+    def delete_output(self):
+        with suppress(OSError):
+            os.remove(self.output)
 
     def pause(self):
         self.state = DownloadState.pausing

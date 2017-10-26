@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import time
-from contextlib import suppress
 from urllib.parse import urlparse
 
 from multidl.downloaders.abstract_downloader import AbstractDownloader
@@ -44,8 +42,7 @@ class LocalFileDownloader(AbstractDownloader):
             self.state = DownloadState.finished
 
     def __get_chunk(self, f):
-        while self.state == DownloadState.paused:
-            time.sleep(0.1)
+        self._wait_in_state(DownloadState.paused)
         return f.read(self.CHUNK_SIZE)
 
     def get_progress(self):
@@ -53,5 +50,4 @@ class LocalFileDownloader(AbstractDownloader):
 
     def cancel(self):
         super().cancel()
-        with suppress(OSError):
-            os.remove(self.output)
+        self.delete_output()

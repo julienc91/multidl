@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-import time
 from ftplib import FTP
-from contextlib import suppress
 from urllib.parse import urlparse
 
 from multidl.downloaders.abstract_downloader import AbstractDownloader
@@ -55,9 +53,7 @@ class FtpDownloader(AbstractDownloader):
             self.state = DownloadState.finished
 
     def __write_chunk(self, f, data):
-        while self.state == DownloadState.paused:
-            time.sleep(0.1)
-
+        self._wait_in_state(DownloadState.paused)
         self._downloaded_length += len(data)
         f.write(data)
 
@@ -68,5 +64,4 @@ class FtpDownloader(AbstractDownloader):
         super().cancel()
         if self.__ftp.sock:
             self.__ftp.abort()
-        with suppress(OSError):
-            os.remove(self.output)
+        self.delete_output()
