@@ -8,13 +8,13 @@ from multidl.constants import DownloadState
 from multidl.exceptions import TransitionError
 
 
-def test_download_multiple_files_same_name(downloader, tempdir):
+def test_download_multiple_files_same_name(downloader, tmpdir):
 
     url, downloader = downloader
     url, _, _, _ = url
 
     downloaders = [
-        downloader(url, tempdir)
+        downloader(url, str(tmpdir))
         for _ in range(50)
     ]
 
@@ -24,12 +24,12 @@ def test_download_multiple_files_same_name(downloader, tempdir):
     assert len(output_files) == len(downloaders)
 
 
-def test_basic_download(downloader, tempdir):
+def test_basic_download(downloader, tmpdir):
 
     url, downloader = downloader
     url, hasher, expected_hash, expected_size = url
 
-    downloader = downloader(url, tempdir)
+    downloader = downloader(url, str(tmpdir))
     assert downloader.state == DownloadState.not_started
 
     downloader.start()
@@ -48,12 +48,12 @@ def test_basic_download(downloader, tempdir):
     assert resulting_hash == expected_hash
 
 
-def test_cancel_before_start(downloader, tempdir):
+def test_cancel_before_start(downloader, tmpdir):
 
     url, downloader = downloader
     url, _, _, _ = url
 
-    downloader = downloader(url, tempdir)
+    downloader = downloader(url, str(tmpdir))
     downloader.cancel()
 
     assert downloader.state == DownloadState.canceled
@@ -62,46 +62,46 @@ def test_cancel_before_start(downloader, tempdir):
     assert downloaded_size == 0
 
 
-def test_pause_before_start(downloader, tempdir):
+def test_pause_before_start(downloader, tmpdir):
 
     url, downloader = downloader
     url, _, _, _ = url
 
-    downloader = downloader(url, tempdir)
+    downloader = downloader(url, str(tmpdir))
     with pytest.raises(TransitionError):
         downloader.pause()
 
     assert downloader.state == DownloadState.not_started
 
 
-def test_resume_before_start(downloader, tempdir):
+def test_resume_before_start(downloader, tmpdir):
 
     url, downloader = downloader
     url, _, _, _ = url
 
-    downloader = downloader(url, tempdir)
+    downloader = downloader(url, str(tmpdir))
     with pytest.raises(TransitionError):
         downloader.resume()
 
     assert downloader.state == DownloadState.not_started
 
 
-def test_pause_after_start(downloader, tempdir):
+def test_pause_after_start(downloader, tmpdir):
     url, downloader = downloader
     url, _, _, _ = url
 
-    downloader = downloader(url, tempdir)
+    downloader = downloader(url, str(tmpdir))
     downloader._state = DownloadState.started
 
     downloader.pause()
     assert downloader.state == DownloadState.paused
 
 
-def test_resume_after_pause(downloader, tempdir):
+def test_resume_after_pause(downloader, tmpdir):
     url, downloader = downloader
     url, _, _, _ = url
 
-    downloader = downloader(url, tempdir)
+    downloader = downloader(url, str(tmpdir))
     downloader._state = DownloadState.paused
 
     downloader.resume()

@@ -58,7 +58,7 @@ class DownloadManager:
             watcher = Thread(target=self.watcher)
             watcher.start()
 
-            for i in range(self.nb_workers):
+            for _ in range(self.nb_workers):
                 t = Thread(target=self.worker)
                 t.start()
 

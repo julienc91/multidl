@@ -31,9 +31,9 @@ def test_get_downloader_invalid_url():
     (DownloadState.canceling, DownloadState.canceled),
     (DownloadState.started, DownloadState.finished),
 ])
-def test_change_state(tempdir, current_state, new_state):
+def test_change_state(tmpdir, current_state, new_state):
 
-    download_manager = DownloadManager([], tempdir, 4)
+    download_manager = DownloadManager([], str(tmpdir), 4)
     assert download_manager.state == DownloadState.not_started
 
     download_manager._state = current_state
@@ -49,9 +49,9 @@ def test_change_state(tempdir, current_state, new_state):
     (DownloadState.finished, DownloadState.paused),
     (DownloadState.canceling, DownloadState.started),
 ])
-def test_change_state_invalid(tempdir, current_state, new_state):
+def test_change_state_invalid(tmpdir, current_state, new_state):
 
-    download_manager = DownloadManager([], tempdir, 4)
+    download_manager = DownloadManager([], str(tmpdir), 4)
     assert download_manager.state == DownloadState.not_started
 
     download_manager._state = current_state
@@ -60,30 +60,30 @@ def test_change_state_invalid(tempdir, current_state, new_state):
     assert download_manager.state == current_state
 
 
-def test_basic_downloads(test_urls, tempdir):
+def test_basic_downloads(test_urls, tmpdir):
 
     urls = [url[0] for url in test_urls]
 
-    download_manager = DownloadManager(urls, tempdir, 4)
+    download_manager = DownloadManager(urls, str(tmpdir), 4)
     assert download_manager.state == DownloadState.not_started
     download_manager.process()
 
     assert download_manager.state == DownloadState.finished
 
 
-def test_cancel_before_start(test_urls, tempdir):
+def test_cancel_before_start(test_urls, tmpdir):
 
     urls = [url[0] for url in test_urls]
 
-    download_manager = DownloadManager(urls, tempdir, 4)
+    download_manager = DownloadManager(urls, str(tmpdir), 4)
     download_manager.cancel()
     assert download_manager.state == DownloadState.canceled
 
 
-def test_basic_download_invalid_url(tempdir):
+def test_basic_download_invalid_url(tmpdir):
 
     urls = ['foo://bar']
-    download_manager = DownloadManager(urls, tempdir, 4)
+    download_manager = DownloadManager(urls, str(tmpdir), 4)
     download_manager.process()
 
     assert download_manager.state == DownloadState.finished

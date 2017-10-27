@@ -2,9 +2,7 @@
 
 import os
 import uuid
-import shutil
 import hashlib
-import tempfile
 
 import pytest
 
@@ -56,19 +54,6 @@ def test_urls(http_url, ftp_url, local_file_url):
         ftp_url,
         local_file_url,
     ]
-
-
-@pytest.fixture(scope='function')
-def tempdir():
-    base_tempdir = tempfile.gettempdir()
-    random = str(uuid.uuid4())
-    resulting_tempdir = os.path.join(base_tempdir, random)
-
-    os.makedirs(resulting_tempdir)
-
-    yield resulting_tempdir
-
-    shutil.rmtree(resulting_tempdir, ignore_errors=True)
 
 
 @pytest.fixture(

@@ -11,6 +11,6 @@ from multidl.downloaders.http_downloader import HttpDownloader
     ('http://user:password@www.example.com:2222/dir/file3.txt', 'file3.txt'),
     ('https://www.example.com/dir/file4.txt', 'file4.txt'),
 ])
-def test_get_file_name(tempdir, url, expected):
-    downloader = HttpDownloader(url, tempdir)
+def test_get_file_name(tmpdir, url, expected):
+    downloader = HttpDownloader(url, str(tmpdir))
     assert downloader.get_file_name() == expected
