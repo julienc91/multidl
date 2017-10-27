@@ -1,11 +1,21 @@
+env:
+  global:
+    - CC_TEST_REPORTER_ID=54e10311936ea1def3ec29afb788b0221ed2dc82fb802f13ba4a2e070d1b8796
 language: python
 python:
   - 3.4
   - 3.5
   - 3.6
   - pypy3
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
 install:
   - pip install codecov
 script: coverage run --source=multidl setup.py test
+after_script:
+  - ./cc-test-reporter after-build --exit-code 
 after_success:
-  codecov
+  - codecov
+
