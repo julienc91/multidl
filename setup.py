@@ -6,6 +6,7 @@ setup(
     packages=['multidl'],
     install_requires=[
         'requests',
+        'tqdm',
     ],
     setup_requires=[
         'pytest-runner',

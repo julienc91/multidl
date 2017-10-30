@@ -5,7 +5,9 @@ import time
 from queue import Queue, Empty
 from threading import Thread
 
-from multidl.constants import DownloadState, STATE_TRANSITIONS, STATE_NAMES
+from tqdm import tqdm
+
+from multidl.constants import DownloadState, STATE_TRANSITIONS
 from multidl.downloaders import SCHEMES
 from multidl.exceptions import TransitionError
 
@@ -20,12 +22,12 @@ class DownloadManager:
 
         self._urls = Queue()
         self._state = DownloadState.not_started
-        self._downloaders = []
+        self._download_handlers = []
 
         # initialize the queue
         for i, url in enumerate(urls):
             self._urls.put((i, url))
-            self._downloaders.append((None, url))
+            self._download_handlers.append(DownloadHandler(url))
 
     def log(self, *args, **kwargs):
         if self.options.get('quiet'):
@@ -84,7 +86,7 @@ class DownloadManager:
 
             downloader = self.process_single_url(url)
             if downloader:
-                self._downloaders[index] = (downloader, url)
+                self._download_handlers[index].downloader = downloader
                 downloader.start()
             self._urls.task_done()
 
@@ -99,45 +101,70 @@ class DownloadManager:
         download_process = downloader(url, output)
         return download_process
 
-    def _print_downloader_state(self, downloader, url):
-
-        if downloader is None:
-            state = DownloadState.not_started
-        else:
-            state = downloader.state
-
-        if state in [DownloadState.not_started, DownloadState.finished,
-                     DownloadState.canceled, DownloadState.error]:
-            self.log('{}: {}'.format(url, STATE_NAMES[state]))
-        else:
-            downloaded, total = downloader.get_progress()
-            self.log('{}: {} - {} / {}'.format(url, STATE_NAMES[state],
-                                               downloaded, total))
-
     def watcher(self):
+
         while self._urls.unfinished_tasks:
 
-            for downloader, url in self._downloaders:
-                self._print_downloader_state(downloader, url)
-            self.log('----------------------')
+            for download_handler in self._download_handlers:
+                download_handler.update_progress()
             time.sleep(1)
 
         self.state = DownloadState.finished
 
     def pause(self):
         self.state = DownloadState.pausing
-        for downloader, _ in self._downloaders:
-            downloader and downloader.pause()
+        for download_handler in self._download_handlers:
+            download_handler.pause()
         self.state = DownloadState.paused
 
     def resume(self):
         self.state = DownloadState.resuming
-        for downloader, _ in self._downloaders:
-            downloader and downloader.resume()
+        for download_handler in self._download_handlers:
+            download_handler.resume()
         self.state = DownloadState.started
 
     def cancel(self):
         self.state = DownloadState.canceling
-        for downloader, _ in self._downloaders:
-            downloader and downloader.cancel()
+        for download_handler in self._download_handlers:
+            download_handler.cancel()
         self.state = DownloadState.canceled
+
+
+class DownloadHandler:
+
+    def __init__(self, url):
+        self.url = url
+        self.downloader = None
+        self.progress_bar = None
+
+    @staticmethod
+    def unit_converter(base_unit):
+        return base_unit
+
+    def update_progress(self):
+        if not self.downloader:
+            return
+
+        downloaded, total = self.downloader.get_progress()
+
+        if self.progress_bar is None:
+            bar_name = os.path.basename(self.downloader.output)
+            self.progress_bar = tqdm(
+                total=total, desc=bar_name, disable=False,
+                unit='b', unit_scale=True, unit_divisor=1024)
+        progress = downloaded - self.progress_bar.n
+        self.progress_bar.update(progress)
+
+        if self.downloader.state in [DownloadState.finished,
+                                     DownloadState.canceled,
+                                     DownloadState.error]:
+            self.progress_bar.close()
+
+    def pause(self):
+        self.downloader and self.downloader.pause()
+
+    def resume(self):
+        self.downloader and self.downloader.resume()
+
+    def cancel(self):
+        self.downloader and self.downloader.cancel()
