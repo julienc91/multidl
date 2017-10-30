@@ -137,10 +137,6 @@ class DownloadHandler:
         self.downloader = None
         self.progress_bar = None
 
-    @staticmethod
-    def unit_converter(base_unit):
-        return base_unit
-
     def update_progress(self):
         if not self.downloader:
             return
