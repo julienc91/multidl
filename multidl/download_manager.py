@@ -103,10 +103,13 @@ class DownloadManager:
 
     def watcher(self):
 
-        while self._urls.unfinished_tasks:
+        while True:
 
             for download_handler in self._download_handlers:
                 download_handler.update_progress()
+
+            if not self._urls.unfinished_tasks:
+                break
             time.sleep(1)
 
         self.state = DownloadState.finished
