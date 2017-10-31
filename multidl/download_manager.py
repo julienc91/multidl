@@ -113,6 +113,7 @@ class DownloadManager:
             time.sleep(1)
 
         self.state = DownloadState.finished
+        tqdm.write('')
 
     def pause(self):
         self.state = DownloadState.pausing
