@@ -12,6 +12,11 @@ Download files from anywhere in parallel.
 * Licence: MIT
 * Url: http://github.com/julienc91/multidl
 
+Demo
+----
+
+![Demo](https://github.com/julienc91/multidl/blob/master/docs/demo.gif)
+
 Description
 -----------
 
@@ -43,8 +48,8 @@ ftp://me:passw0rd@ftpserver.com/dir/file2.txt
 
 Then launch `multidl`:
 
-    multidl -c urls.txt -o /tmp -n 3
+    multidl -c urls.txt -o downloads/
     
 You can also give the targeted urls to `multidl` via `stdin` like so:
 
-    cat urls.txt | multidl -o /tmp -n 3
+    cat urls.txt | multidl -o downloads/
