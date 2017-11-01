@@ -106,3 +106,10 @@ def test_resume_after_pause(downloader, tmpdir):
 
     downloader.resume()
     assert downloader.state == DownloadState.started
+
+
+def test_can_handle_url(downloader):
+    url, downloader = downloader
+    url, _, _, _ = url
+
+    assert downloader.can_handle_url(url)

@@ -4,6 +4,7 @@ import os
 import time
 from queue import Queue, Empty
 from threading import Thread
+from urllib.parse import urlparse
 
 from tqdm import tqdm
 
@@ -36,11 +37,14 @@ class DownloadManager:
 
     @staticmethod
     def get_downloader(url):
-        scheme = url.split('://')[0].lower()
-        if scheme not in SCHEMES:
-            raise NotImplementedError('No downloader for {} urls'
-                                      .format(scheme))
-        return SCHEMES[scheme]
+
+        parsed_url = urlparse(url)
+        for downloader in SCHEMES.get(parsed_url.scheme, []):
+            if downloader.can_handle_url(url):
+                return downloader
+
+        raise NotImplementedError('No downloader for {} urls'
+                                  .format(parsed_url.scheme))
 
     @property
     def state(self):

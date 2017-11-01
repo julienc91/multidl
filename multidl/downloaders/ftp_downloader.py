@@ -16,6 +16,11 @@ class FtpDownloader(AbstractDownloader):
         self._downloaded_length = 0
         self.__ftp = FTP()
 
+    @staticmethod
+    def can_handle_url(url):
+        parsed_url = urlparse(url)
+        return parsed_url.scheme == 'ftp'
+
     def __connect(self):
 
         parsed_url = urlparse(self.url)

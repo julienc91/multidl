@@ -20,6 +20,16 @@ def http_url():
 
 
 @pytest.fixture(scope='session')
+def youtube_url():
+    return (
+        'https://www.youtube.com/watch?v=y8Kyi0WNg40',
+        hashlib.sha1,
+        '4588f896333c4990f6ef4dca9e9a2ac32da549dd',
+        282012,
+    )
+
+
+@pytest.fixture(scope='session')
 def ftp_url():
     return (
         'ftp://speedtest.tele2.net/1MB.zip',
@@ -48,9 +58,10 @@ def local_file_url():
 
 
 @pytest.fixture(scope='session')
-def test_urls(http_url, ftp_url, local_file_url):
+def test_urls(http_url, youtube_url, ftp_url, local_file_url):
     return [
         http_url,
+        youtube_url,
         ftp_url,
         local_file_url,
     ]
@@ -59,6 +70,7 @@ def test_urls(http_url, ftp_url, local_file_url):
 @pytest.fixture(
     params=[
         ('http_url', multidl.downloaders.HttpDownloader),
+        ('youtube_url', multidl.downloaders.YoutubeDownloader),
         ('ftp_url', multidl.downloaders.FtpDownloader),
         ('local_file_url', multidl.downloaders.LocalFileDownloader),
     ]

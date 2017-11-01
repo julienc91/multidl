@@ -18,6 +18,11 @@ class HttpDownloader(AbstractDownloader):
         self._downloaded_length = 0
         self.__request = None
 
+    @staticmethod
+    def can_handle_url(url):
+        parsed_url = urlparse(url)
+        return parsed_url.scheme in ['http', 'https']
+
     def get_file_name(self):
         parsed_url = urlparse(self.url)
         return os.path.basename(parsed_url.path) or 'index.html'

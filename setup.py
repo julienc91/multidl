@@ -11,6 +11,7 @@ setup(
     install_requires=[
         'requests',
         'tqdm',
+        'pytube >= 7.0',
     ],
     setup_requires=[
         'pytest-runner',

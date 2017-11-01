@@ -21,6 +21,10 @@ class AbstractDownloader(ABC):
         self._error = None
         self._lock = Lock()
 
+    @staticmethod
+    def can_handle_url(url):
+        raise NotImplementedError
+
     @property
     def output(self):
         if self._output_file:
