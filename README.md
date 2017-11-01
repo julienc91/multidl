@@ -28,6 +28,10 @@ With `multidl`, download multiple files in parallel from a single command line.
 * http
 * https
 
+There is also a special treatment for the following platforms:
+
+* YouTube
+
 Install
 -------
 

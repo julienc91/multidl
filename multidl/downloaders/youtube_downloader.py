@@ -31,13 +31,14 @@ class YoutubeDownloader(AbstractDownloader):
         super().start()
 
         self.yt.register_on_progress_callback(
-            lambda *args, **kwargs: self.__get_chunk(*args, **kwargs))
+            lambda *args: self.__get_chunk(*args))
         self._download_length = self.stream.filesize
 
         self.stream.download(os.path.dirname(self.output))
         self._finish()
 
-    def __get_chunk(self, stream, chunk, file_handle, bytes_remaining):
+    def __get_chunk(self, *args):
+        _, chunk, _, bytes_remaining = args
         self._wait_in_state(DownloadState.paused)
         self._downloaded_length += len(chunk)
         self._download_length = self._downloaded_length + bytes_remaining
