@@ -24,8 +24,8 @@ def youtube_url():
     return (
         'https://www.youtube.com/watch?v=y8Kyi0WNg40',
         hashlib.sha1,
-        '4588f896333c4990f6ef4dca9e9a2ac32da549dd',
-        282012,
+        '8f6e676fc6cfbec1408a55f0f6a25b62b5ade072',
+        219662,
     )
 
 
