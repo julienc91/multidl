@@ -37,7 +37,7 @@ Install
 
 One simple command line:
 
-    python setup.py install
+    python3 setup.py install
 
 Usage
 -----
