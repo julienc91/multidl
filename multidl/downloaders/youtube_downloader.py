@@ -22,7 +22,7 @@ class YoutubeDownloader(AbstractDownloader):
 
     @staticmethod
     def can_handle_url(url):
-        return re.match(r'^https?://(www\.)?youtube\.com/watch\?v=\w+', url)
+        return re.match(r'^https?://(www\.)?youtube\.com/watch\?v=[\w-]+', url)
 
     def get_file_name(self):
         return self.stream.default_filename
