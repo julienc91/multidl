@@ -8,6 +8,7 @@ from multidl.constants import DownloadState
 from multidl.exceptions import TransitionError
 
 
+@pytest.mark.full
 def test_download_multiple_files_same_name(downloader, tmpdir):
 
     url, downloader = downloader
@@ -24,6 +25,7 @@ def test_download_multiple_files_same_name(downloader, tmpdir):
     assert len(output_files) == len(downloaders)
 
 
+@pytest.mark.full
 def test_basic_download(downloader, tmpdir):
 
     url, downloader = downloader
@@ -48,6 +50,7 @@ def test_basic_download(downloader, tmpdir):
     assert resulting_hash == expected_hash
 
 
+@pytest.mark.full
 def test_cancel_before_start(downloader, tmpdir):
 
     url, downloader = downloader
@@ -62,6 +65,7 @@ def test_cancel_before_start(downloader, tmpdir):
     assert downloaded_size == 0
 
 
+@pytest.mark.full
 def test_pause_before_start(downloader, tmpdir):
 
     url, downloader = downloader
@@ -74,6 +78,7 @@ def test_pause_before_start(downloader, tmpdir):
     assert downloader.state == DownloadState.not_started
 
 
+@pytest.mark.full
 def test_resume_before_start(downloader, tmpdir):
 
     url, downloader = downloader
@@ -86,6 +91,7 @@ def test_resume_before_start(downloader, tmpdir):
     assert downloader.state == DownloadState.not_started
 
 
+@pytest.mark.full
 def test_pause_after_start(downloader, tmpdir):
     url, downloader = downloader
     url, _, _, _ = url
@@ -97,6 +103,7 @@ def test_pause_after_start(downloader, tmpdir):
     assert downloader.state == DownloadState.paused
 
 
+@pytest.mark.full
 def test_resume_after_pause(downloader, tmpdir):
     url, downloader = downloader
     url, _, _, _ = url

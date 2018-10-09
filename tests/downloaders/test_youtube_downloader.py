@@ -5,6 +5,7 @@ import pytest
 from multidl.downloaders.youtube_downloader import YoutubeDownloader
 
 
+@pytest.mark.full
 @pytest.mark.parametrize('url, expected', [
     ('https://www.youtube.com/watch?v=y8Kyi0WNg40', 'Dramatic Look.webm'),
 ])

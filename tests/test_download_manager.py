@@ -60,6 +60,7 @@ def test_change_state_invalid(tmpdir, current_state, new_state):
     assert download_manager.state == current_state
 
 
+@pytest.mark.full
 def test_basic_downloads(test_urls, tmpdir):
 
     urls = [url[0] for url in test_urls]
@@ -71,6 +72,7 @@ def test_basic_downloads(test_urls, tmpdir):
     assert download_manager.state == DownloadState.finished
 
 
+@pytest.mark.full
 def test_cancel_before_start(test_urls, tmpdir):
 
     urls = [url[0] for url in test_urls]
@@ -80,6 +82,7 @@ def test_cancel_before_start(test_urls, tmpdir):
     assert download_manager.state == DownloadState.canceled
 
 
+@pytest.mark.full
 def test_basic_download_invalid_url(tmpdir):
 
     urls = ['foo://bar']

@@ -45,12 +45,14 @@ def test_parse_args_invalid_parameters(monkeypatch, config_file, tmpdir):
             parse_args()
 
 
+@pytest.mark.full
 def test_run_from_cli_with_file(monkeypatch, config_file, tmpdir):
     monkeypatch.setattr('sys.argv', ['multidl', '-n', '4', '-c',
                                      config_file, '-o', str(tmpdir)])
     main()
 
 
+@pytest.mark.full
 def test_run_from_cli_with_stdin(monkeypatch, config_file, tmpdir):
     with open(config_file) as f:
         stdin = StringIO(f.read())

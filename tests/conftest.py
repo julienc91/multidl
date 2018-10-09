@@ -9,6 +9,16 @@ import pytest
 import multidl.downloaders
 
 
+def pytest_addoption(parser):
+    parser.addoption("--full", action="store_true",
+                     help="Run tests based on external resources as well")
+
+
+def pytest_runtest_setup(item):
+    if 'full' in item.keywords and not item.config.getoption("--full"):
+        pytest.skip("--full option required to run this test")
+
+
 @pytest.fixture(scope='session')
 def http_url():
     return (
